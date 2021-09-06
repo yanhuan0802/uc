@@ -3,7 +3,7 @@ package main
 
 import (
 	"fmt"
-	"uc/uc"
+	"github.com/yanhuan0802/uc/uc"
 )
 
 func main() {
