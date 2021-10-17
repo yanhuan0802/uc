@@ -29,7 +29,7 @@ func hello(w http.ResponseWriter, r *http.Request) {
 		ip = exnet.ClientIP(r)
 	}
 	statusCode := 200
-	fmt.Println("IP:", ip, "http status code:", statusCode)
+	fmt.Println("IP:", ip, "http status code:", statusCode, "version", version)
 	w.WriteHeader(statusCode)
 }
 

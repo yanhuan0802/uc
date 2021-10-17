@@ -1,4 +1,4 @@
-// uc.go
+// Package uc uc.go
 package uc
 
 import "strings"
