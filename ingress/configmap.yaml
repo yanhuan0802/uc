@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: versionconf
+data:
+  version: "1.1.0"

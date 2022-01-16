@@ -4,20 +4,29 @@ package main
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
+	"time"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/thinkeridea/go-extend/exnet"
+
+	"github.com/yanhuan0802/uc/httpserver/metrics"
 )
 
 func hello(w http.ResponseWriter, r *http.Request) {
+	timer := metrics.NewTimer()
+	defer timer.ObserveTotal()
 	//接收客户端 request，并将 request 中带的 header 写入 response header
 	for key, values := range r.Header {
 		for _, value := range values {
 			w.Header().Add(key, value)
 		}
 	}
-
+	//添加0-2s随机延迟
+	delay := randInt(10, 2000)
+	time.Sleep(time.Millisecond * time.Duration(delay))
 	//读取当前系统的环境变量中的 VERSION 配置，并写入 response header
 	v := "VERSION"
 	version := os.Getenv(v)
@@ -44,9 +53,15 @@ func healthZ(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func randInt(min int, max int) int {
+	rand.Seed(time.Now().UTC().UnixNano())
+	return min + rand.Intn(max-min)
+}
+
 func main() {
 	http.HandleFunc("/hello", hello)
 	http.HandleFunc("/healthz", healthZ)
+	http.Handle("metrics", promhttp.Handler())
 
 	err := http.ListenAndServe(":80", nil)
 	if err != nil {

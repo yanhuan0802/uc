@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: httpserver
+  name: httpserver
+spec:
+  replicas: 2
+  # RS清理策略
+  revisionHistoryLimit: 10
+  # 进度期限秒数
+  progressDeadlineSeconds: 600
+  selector:
+    matchLabels:
+      app: httpserver
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: httpserver
+    spec:
+      containers:
+        - name: httpserver
+          image: yanhuan6252/httpserver:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          # 配置和代码分离
+          env:
+            - name: VERSION # 请注意这里和 ConfigMap 中的键名是不一样的
+                valueFrom:
+                  configMapKeyRef:
+                    name: versionconf  # 这个值来自 ConfigMap
+                    key: version # 需要取值的键
+          # 存活探测
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          # 就绪探测
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+            failureThreshold: 3
+          # 资源限制
+          resources:
+            limits:
+              cpu: 200m
+              memory: 100Mi
+            requests:
+              cpu: 20m
+              memory: 20Mi
+          lifecycle:
+            # 优雅启动
+            postStart:
+              exec:
+                command: [ "/bin/sh", "-c", "echo httpserver postStart. >/proc/1/fd/1" ]
+            # 优雅终止
+            preStop:
+              exec:
+                command: [ "/bin/sh","-c", "sleep 20 && echo httpserver preSop.  >/dev/termination-log " ]
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: { }
+      terminationGracePeriodSeconds: 30
