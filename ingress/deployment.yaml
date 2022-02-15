@@ -20,7 +20,6 @@ spec:
     type: RollingUpdate
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: httpserver
     spec:
@@ -59,7 +58,7 @@ spec:
             successThreshold: 1
             timeoutSeconds: 1
             failureThreshold: 3
-          # 资源限制
+          # 资源限制 QOS
           resources:
             limits:
               cpu: 200m
@@ -80,6 +79,4 @@ spec:
           terminationMessagePolicy: File
       dnsPolicy: ClusterFirst
       restartPolicy: Always
-      schedulerName: default-scheduler
-      securityContext: { }
       terminationGracePeriodSeconds: 30
