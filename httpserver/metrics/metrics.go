@@ -17,7 +17,7 @@ const (
 	MetricsNamespace = "httpserver"
 )
 
-// NewExecutionTimer provides a timer for Updater's RunOnce execution
+// NewTimer NewExecutionTimer provides a timer for Updater's RunOnce execution
 func NewTimer() *ExecutionTimer {
 	return NewExecutionTimer(functionLatency)
 }
